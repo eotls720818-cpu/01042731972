@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>블로그 멀티 포스팅 도우미</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background: #f0f2f5; color: #1a1a1a; min-height: 100vh; }
+
+  header {
+    background: #fff; border-bottom: 1px solid #e5e7eb;
+    padding: 16px 32px; display: flex; align-items: center; gap: 12px;
+  }
+  .logo {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 16px; font-weight: 700;
+  }
+  header h1 { font-size: 17px; font-weight: 600; }
+  header p { font-size: 12px; color: #9ca3af; margin-left: 6px; }
+
+  .container { max-width: 1080px; margin: 0 auto; padding: 24px 20px; }
+
+  .card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; padding: 22px; margin-bottom: 18px; }
+  .card-title { font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .badge { background: #f3f4f6; color: #6b7280; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+
+  label { font-size: 12px; color: #6b7280; display: block; margin-bottom: 5px; }
+  input[type=text], textarea {
+    width: 100%; padding: 10px 13px; font-family: inherit; font-size: 14px;
+    color: #111; background: #f9fafb; border: 1px solid #e5e7eb;
+    border-radius: 8px; outline: none; transition: border-color 0.15s;
+  }
+  input[type=text]:focus, textarea:focus { border-color: #6366f1; background: #fff; }
+  textarea { resize: vertical; line-height: 1.7; }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+
+  .gen-btn {
+    width: 100%; padding: 13px; border: none; border-radius: 10px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .gen-btn:hover { opacity: 0.9; }
+  .gen-btn:active { transform: scale(0.98); }
+  .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .status-bar {
+    display: none; align-items: center; gap: 10px;
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+    padding: 11px 16px; margin-bottom: 16px; font-size: 13px; color: #6b7280;
+  }
+  .status-bar.show { display: flex; }
+  .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #e5e7eb; border-top-color: #6366f1; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .ref-card { display: none; }
+  .ref-card.show { display: block; }
+  .ref-list { display: flex; flex-direction: column; gap: 6px; }
+  .ref-item {
+    background: #f9fafb; border: 1px solid #f0f0f0; border-radius: 7px;
+    padding: 9px 12px; font-size: 13px; cursor: pointer; transition: background 0.1s;
+  }
+  .ref-item:hover { background: #ede9fe; }
+  .ref-item-title { font-weight: 500; color: #374151; }
+  .ref-sub { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+
+  .platforms { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .platform-card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; padding: 18px; }
+  .platform-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding-bottom: 13px; border-bottom: 1px solid #f3f4f6; }
+  .p-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; }
+  .p-icon.naver { background: #e8f9ee; color: #03C75A; }
+  .p-icon.daum  { background: #fffbea; color: #d97706; }
+  .p-icon.tistory { background: #fff1ee; color: #ef4444; }
+  .p-name { font-size: 14px; font-weight: 600; }
+  .p-sub { font-size: 11px; color: #9ca3af; }
+
+  .field-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin: 12px 0 5px; }
+  .field-label:first-of-type { margin-top: 0; }
+
+  .result-box {
+    background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;
+    padding: 9px 12px; font-size: 13px; min-height: 38px;
+    line-height: 1.6; word-break: keep-all; color: #c4c9d4; font-style: italic;
+  }
+  .result-box.desc { min-height: 72px; }
+  .result-box.filled { color: #111; font-style: normal; }
+
+  .action-row { display: flex; gap: 7px; margin-top: 10px; }
+  .copy-btn {
+    flex: 1; padding: 7px 6px; background: #f3f4f6; border: 1px solid #e5e7eb;
+    border-radius: 7px; font-size: 11px; color: #6b7280; cursor: pointer;
+    transition: background 0.1s; font-family: inherit;
+  }
+  .copy-btn:hover { background: #e5e7eb; }
+  .copy-btn.copied { background: #ecfdf5; border-color: #6ee7b7; color: #059669; }
+
+  @media (max-width: 768px) {
+    .platforms, .row2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">B</div>
+  <h1>블로그 멀티 포스팅 도우미</h1>
+  <p>네이버 · 다음 카페 · 티스토리</p>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <div class="card-title">✏️ 글 작성</div>
+    <div class="row2">
+      <div>
+        <label>검색 키워드 *</label>
+        <input type="text" id="keyword" placeholder="예: 분말혼합기, 식품기계, 업소용냉장고" />
+      </div>
+      <div>
+        <label>업종 / 카테고리</label>
+        <input type="text" id="category" placeholder="예: 식품기계, 주방용품, 건설업" />
+      </div>
+    </div>
+    <div style="margin-bottom:14px">
+      <label>본문 내용 (선택)</label>
+      <textarea id="body" rows="7" placeholder="블로그 본문을 여기에 작성하세요...&#10;본문이 있으면 더 정확한 제목/설명이 생성됩니다."></textarea>
+    </div>
+    <button class="gen-btn" id="genBtn" onclick="generate()">
+      🔍 검색 상위 수집 후 제목 · 설명 자동 생성
+    </button>
+  </div>
+
+  <div class="status-bar" id="statusBar">
+    <div class="spinner"></div>
+    <span id="statusText">네이버 검색 결과 수집 중...</span>
+  </div>
+
+  <div class="card ref-card" id="refCard">
+    <div class="card-title">📊 네이버 상위 노출 제목 수집 결과 <span class="badge" id="refCount">0개</span></div>
+    <p style="font-size:12px;color:#9ca3af;margin-bottom:10px">클릭하면 복사됩니다. AI가 이 제목들을 참고하여 최적화된 제목을 생성합니다.</p>
+    <div class="ref-list" id="refList"></div>
+  </div>
+
+  <div class="platforms">
+    <div class="platform-card">
+      <div class="platform-header">
+        <div class="p-icon naver">N</div>
+        <div><div class="p-name">네이버 블로그</div><div class="p-sub">SEO 최적화 · 검색 유입</div></div>
+      </div>
+      <div class="field-label">제목</div>
+      <div class="result-box" id="naver-title">생성 후 표시됩니다</div>
+      <div class="field-label">설명</div>
+      <div class="result-box desc" id="naver-desc">생성 후 표시됩니다</div>
+      <div class="action-row">
+        <button class="copy-btn" onclick="copyField('naver-title', this)">제목 복사</button>
+        <button class="copy-btn" onclick="copyField('naver-desc', this)">설명 복사</button>
+        <button class="copy-btn" onclick="copyAll('naver', this)">전체 복사</button>
+      </div>
+    </div>
+
+    <div class="platform-card">
+      <div class="platform-header">
+        <div class="p-icon daum">D</div>
+        <div><div class="p-name">다음 카페</div><div class="p-sub">커뮤니티 감성 · 공감 유도</div></div>
+      </div>
+      <div class="field-label">제목</div>
+      <div class="result-box" id="daum-title">생성 후 표시됩니다</div>
+      <div class="field-label">설명</div>
+      <div class="result-box desc" id="daum-desc">생성 후 표시됩니다</div>
+      <div class="action-row">
+        <button class="copy-btn" onclick="copyField('daum-title', this)">제목 복사</button>
+        <button class="copy-btn" onclick="copyField('daum-desc', this)">설명 복사</button>
+        <button class="copy-btn" onclick="copyAll('daum', this)">전체 복사</button>
+      </div>
+    </div>
+
+    <div class="platform-card">
+      <div class="platform-header">
+        <div class="p-icon tistory">T</div>
+        <div><div class="p-name">티스토리</div><div class="p-sub">트렌디 · 클릭률 최적화</div></div>
+      </div>
+      <div class="field-label">제목</div>
+      <div class="result-box" id="tistory-title">생성 후 표시됩니다</div>
+      <div class="field-label">설명</div>
+      <div class="result-box desc" id="tistory-desc">생성 후 표시됩니다</div>
+      <div class="action-row">
+        <button class="copy-btn" onclick="copyField('tistory-title', this)">제목 복사</button>
+        <button class="copy-btn" onclick="copyField('tistory-desc', this)">설명 복사</button>
+        <button class="copy-btn" onclick="copyAll('tistory', this)">전체 복사</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const resultData = {};
+
+function setStatus(msg, show=true) {
+  const bar = document.getElementById('statusBar');
+  bar.classList.toggle('show', show);
+  if (msg) document.getElementById('statusText').textContent = msg;
+}
+
+function setResult(id, text, empty=false) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.classList.toggle('filled', !empty);
+}
+
+async function generate() {
+  const keyword = document.getElementById('keyword').value.trim();
+  const category = document.getElementById('category').value.trim();
+  const body = document.getElementById('body').value.trim();
+  if (!keyword) { alert('검색 키워드를 입력해주세요.'); return; }
+
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ 생성 중...';
+  ['naver','daum','tistory'].forEach(p => {
+    setResult(p+'-title', '생성 중...', true);
+    setResult(p+'-desc', '생성 중...', true);
+  });
+
+  let refTitles = [];
+
+  try {
+    setStatus('🔍 네이버 블로그 상위 검색 결과 수집 중...');
+    const res = await fetch(`/api/naver-search?keyword=${encodeURIComponent(keyword)}`);
+    const data = await res.json();
+
+    if (data.items && data.items.length > 0) {
+      refTitles = data.items.map(item =>
+        item.title.replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#\d+;/g,'')
+      );
+      const refCard = document.getElementById('refCard');
+      const refList = document.getElementById('refList');
+      document.getElementById('refCount').textContent = refTitles.length + '개';
+      refList.innerHTML = '';
+      refTitles.forEach((title, i) => {
+        const div = document.createElement('div');
+        div.className = 'ref-item';
+        div.innerHTML = `<div class="ref-item-title">${i+1}. ${title}</div><div class="ref-sub">클릭하여 복사</div>`;
+        div.onclick = () => {
+          navigator.clipboard.writeText(title);
+          div.style.background = '#ede9fe';
+          setTimeout(() => div.style.background = '', 1200);
+        };
+        refList.appendChild(div);
+      });
+      refCard.classList.add('show');
+    }
+
+    setStatus('🤖 AI가 최적화된 제목과 설명 생성 중...');
+
+    const refText = refTitles.slice(0, 8).map((t,i) => `${i+1}. ${t}`).join('\n');
+    const prompt = `당신은 블로그 SEO 전문가입니다.
+
+키워드: ${keyword}
+${category ? `업종: ${category}` : ''}
+${body ? `본문: ${body.slice(0,800)}` : ''}
+
+[네이버 상위 노출 실제 제목 (참고용)]
+${refText || '없음'}
+
+위 참고 제목들의 패턴을 분석하여 3개 플랫폼에 최적화된 제목과 설명을 생성하세요.
+
+- 네이버 블로그: 키워드 포함, SEO 최적화, 구체적 정보성 (예: TOP5, 완벽정리, 추천), 설명 2-3문장 100자 내외
+- 다음 카페: 커뮤니티 감성, 공감/궁금증 유발, 친근한 톤, 설명 1-2문장 80자 내외
+- 티스토리: 클릭률 높은 트렌디 스타일, 숫자/특수기호 활용, 설명 키워드 중심 80자 내외
+
+JSON만 응답하세요:
+{"naver":{"title":"...","desc":"..."},"daum":{"title":"...","desc":"..."},"tistory":{"title":"...","desc":"..."}}`;
+
+    const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const aiData = await aiRes.json();
+    const text = aiData.content.map(i => i.text || '').join('').replace(/```json|```/g,'').trim();
+    const result = JSON.parse(text);
+
+    ['naver','daum','tistory'].forEach(p => {
+      resultData[p] = result[p];
+      setResult(p+'-title', result[p].title);
+      setResult(p+'-desc', result[p].desc);
+    });
+
+    setStatus('✅ 완료! 복사 버튼을 눌러 각 플랫폼에 붙여넣기 하세요.', true);
+    setTimeout(() => setStatus('', false), 4000);
+
+  } catch(e) {
+    setStatus('❌ 오류: ' + e.message, true);
+    ['naver','daum','tistory'].forEach(p => {
+      setResult(p+'-title', '오류 발생 - 다시 시도해주세요', true);
+      setResult(p+'-desc', '', true);
+    });
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🔍 검색 상위 수집 후 제목 · 설명 자동 생성';
+}
+
+async function copyField(id, btn) {
+  const text = document.getElementById(id).textContent;
+  if (!text || text.includes('표시됩니다') || text.includes('생성 중')) return;
+  await navigator.clipboard.writeText(text);
+  const orig = btn.textContent;
+  btn.classList.add('copied'); btn.textContent = '✓ 복사됨';
+  setTimeout(() => { btn.classList.remove('copied'); btn.textContent = orig; }, 2000);
+}
+
+async function copyAll(platform, btn) {
+  const t = resultData[platform]?.title;
+  const d = resultData[platform]?.desc;
+  if (!t) return;
+  await navigator.clipboard.writeText(`제목: ${t}\n설명: ${d}`);
+  btn.classList.add('copied'); btn.textContent = '✓ 복사됨';
+  setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '전체 복사'; }, 2000);
+}
+</script>
+</body>
+</html>
