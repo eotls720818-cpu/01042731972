@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>식품 설비 설계 계산기</title>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--tx:#1b2430;--mu:#657080;--bd:#d9dee5;--ac:#c2410c;--ok:#e8f5e9;--okb:#2e7d32;--wn:#fff4e5;--wnb:#b45309;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10151b;--card:#1a212a;--tx:#e8edf3;--mu:#97a3b3;--bd:#2d3744;--ac:#fb923c;--ok:#16301b;--okb:#6fcf7a;--wn:#33260f;--wnb:#fbbf24;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10151b;--card:#1a212a;--tx:#e8edf3;--mu:#97a3b3;--bd:#2d3744;--ac:#fb923c;--ok:#16301b;--okb:#6fcf7a;--wn:#33260f;--wnb:#fbbf24;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Noto Sans KR","Malgun Gothic",system-ui,sans-serif;line-height:1.5}
+.w{max-width:1000px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:4px 0 2px}.sub{color:var(--mu);font-size:13px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px}
+.card h2{font-size:15px;margin:0 0 10px;color:var(--ac)}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+label{font-size:12px;color:var(--mu);display:block}
+input,select{width:100%;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font-size:15px}
+.k{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.kp{border:1px solid var(--bd);border-radius:10px;padding:10px;background:var(--bg)}
+.kp b{display:block;font-size:20px}.kp span{font-size:12px;color:var(--mu)}
+.hl{border-color:var(--ac)}
+.msg{padding:9px 12px;border-radius:8px;margin:6px 0;font-size:13px;background:var(--wn);color:var(--wnb);border:1px solid var(--wnb)}
+.msg.ok{background:var(--ok);color:var(--okb);border-color:var(--okb)}
+.sc{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px;min-width:560px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--bd);text-align:right;white-space:nowrap}th{color:var(--mu);font-weight:500}
+td:first-child,th:first-child{text-align:left}tr.rec td{background:var(--ok);font-weight:600}tr.bad td{color:var(--mu)}
+.note{font-size:12px;color:var(--mu)}
+.tabs{display:flex;gap:8px;margin-bottom:14px}.tabs button{flex:1;padding:12px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);font-size:15px;font-weight:600;cursor:pointer}.tabs button.on{background:var(--ac);color:var(--bg);border-color:var(--ac)}
+.bt{padding:9px 12px;border:1px solid var(--ac);border-radius:8px;background:var(--card);color:var(--ac);font-size:14px;font-weight:600;cursor:pointer}.bt.rec{background:#c62828;color:#fff;border-color:#c62828}
+body{padding-bottom:90px}#qbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:2px solid var(--ac);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;justify-content:space-between;cursor:pointer}#qbar b{font-size:20px;color:var(--ac)}#qbar span{font-size:12px;color:var(--mu)}.qt td,.qt th{text-align:right}.qt td:first-child,.qt th:first-child{text-align:left}.pi{padding:6px;font-size:13px}details{margin-top:8px}summary{cursor:pointer;color:var(--ac);font-weight:600;font-size:14px}
+</style></head><body><div class="w">
+<h1>식품 설비 설계 계산기</h1>
+<div class="sub">제품·점도를 고르면 실린더 충진기와 교반기(모터)를 자동 계산합니다.</div>
+<div class='tabs'><button id='t1' class='on' onclick='tab(1)'>① 실린더 충진기</button><button id='t2' onclick='tab(2)'>② 교반기 (모터)</button><button id='t3' onclick='tab(3)'>③ 견적</button></div>
+<div id="pg1">
+
+<div class="card"><h2>① 제품 / 충진 조건</h2><div class="g">
+<div><label>제품 종류</label><select id="pr"></select></div>
+<div><label>점도 (cP)</label><input id="vi" type="number" min="1" step="any"></div>
+<div><label>비중 (g/mL)</label><input id="de" type="number" step="0.01"></div>
+<div><label>★ 충진 용량 (mL/1회)</label><input id="vf" type="number" value="500" min="1"></div>
+<div><label>분당 충진 횟수</label><input id="rt" type="number" value="15" min="1"></div>
+<div><label>충진 시간 비율 (%)</label><input id="du" type="number" value="50" min="10" max="90"></div>
+<div><label>여유율 (%)</label><input id="mg" type="number" step="1"></div>
+<div><label>최대 피스톤 속도 (mm/s)</label><input id="vm" type="number"></div>
+</div></div>
+
+<div class="card"><h2>② 노즐 / 배관 / 구동</h2><div class="g">
+<div><label>노즐 내경 (mm)</label><input id="nd" type="number" step="0.5"></div>
+<div><label>노즐 길이 (mm)</label><input id="nl" type="number" value="50"></div>
+<div><label>배관 내경 (mm)</label><input id="pd" type="number" step="0.5"></div>
+<div><label>배관 길이 (mm)</label><input id="pl" type="number" value="500"></div>
+<div><label>공압 (MPa)</label><input id="ap" type="number" value="0.5" step="0.1"></div>
+<div><label>힘 배수 (안전율)</label><input id="sf" type="number" value="1.5" step="0.1" min="1"></div>
+</div></div>
+
+<div class="card"><h2>③ 계산 결과</h2><div id="cl" class="msg ok"></div><div class="k" id="kp"></div><div id="ms"></div></div>
+
+<div class="card"><h2>④ 표준 보어별 비교</h2><div class="sc"><table id="tb"></table></div>
+<p class="note">초록 행이 추천 (행정/보어 비 1~3, 속도 한도 이내, 보어비 2에 가까운 것). 점도가 높을수록 노즐·배관을 키우고 속도를 낮추세요.</p></div>
+
+<p class="note">※ 층류(하겐-푸아죄유) 기준 추정값이며 필요 추력은 계산힘에 힘 배수(기본 1.5배)를 곱한 값입니다. 고추장·된장 등은 전단 박화 유체라 실제 압력은 다를 수 있으니, 제작 전 실제 시료로 시험하세요. 제품별 점도는 대략값(20~25℃)입니다.</p></div>
+<div id='pg2' style='display:none'>
+<div class='card'><h2>① 제품 / 탱크 / 교반날</h2><div class='g'><div><label>제품 종류</label><select id='apr'></select></div><div><label>점도 (cP)</label><input id='avi' type='number' min='1' step='any'></div><div><label>비중 (g/mL)</label><input id='ade' type='number' step='0.01'></div><div><label>★ 배치 용량 (L)</label><input id='avl' type='number' value='200' min='1'></div><div><label>탱크 내경 (mm)</label><input id='atd' type='number' value='700'></div><div><label>교반날 종류</label><select id='aty'></select></div><div><label>날 지름 / 탱크 지름 비</label><input id='adr' type='number' step='0.05'></div><div><label>회전수 방식</label><select id='arm'><option value='a'>자동 추천</option><option value='m'>직접 입력</option></select></div><div><label>교반 회전수 (rpm)</label><input id='arp' type='number' value='30' min='1'></div></div></div>
+<div class='card'><h2>② 모터 / 감속기</h2><div class='g'><div><label>전달 효율 (%)</label><input id='aef' type='number' value='85'></div><div><label>힘 배수 (안전율)</label><input id='asf' type='number' value='1.5' step='0.1' min='1'></div><div><label>모터 극수 (회전수)</label><select id='amp'><option value='1740'>4극 · 1740rpm</option><option value='3480'>2극 · 3480rpm</option><option value='1160'>6극 · 1160rpm</option></select></div><div><label>축 허용 전단응력 (MPa)</label><input id='atau' type='number' value='25'></div></div></div>
+<div class='card'><h2>③ 계산 결과</h2><div id='acl' class='msg ok'></div><div class='k' id='akp'></div><div id='ams'></div></div>
+<div class='card'><h2>▶ 교반 시뮬레이션</h2><canvas id='cv' width='960' height='480' style='width:100%;border-radius:10px;border:1px solid var(--bd);background:#0f1720'></canvas><div class='g' style='margin-top:10px'><div style='grid-column:1/-1'><label>영상에 넣을 글자 (녹화 영상에 같이 저장됩니다)</label><input id='wtx' placeholder='예: 회사명 · 무단 사용 금지'></div><div><label>글자 색상</label><input id='wco' type='color' value='#ffffff' style='height:38px;padding:2px'></div><div><label>글자 크기 (px)</label><input id='wsz' type='number' value='36' min='10' max='200'></div><div><label>투명도</label><select id='wal'><option value='.9'>진하게</option><option value='.55' selected>보통</option><option value='.3'>연하게</option></select></div><div><label>위치</label><select id='wps'><option value='t'>화면 전체 반복(대각선)</option><option value='c'>중앙</option><option value='bl'>좌하단</option><option value='br'>우하단</option><option value='tl'>좌상단</option><option value='tr'>우상단</option></select></div></div>
+<div class='g' style='margin-top:10px'><div><label>재생 속도</label><select id='sps'><option value='1'>실시간 1×</option><option value='.5'>슬로우 0.5×</option><option value='.25'>슬로우 0.25×</option></select></div><div><label>녹화 길이</label><select id='srl'><option value='5'>5초</option><option value='10' selected>10초</option><option value='20'>20초</option></select></div><div style='display:flex;gap:8px;align-items:end'><button id='sbp' class='bt'>⏸ 정지</button><button id='sbr' class='bt'>● 동영상 녹화·저장</button></div></div><div id='smg' class='note' style='margin-top:6px'></div><video id='svd' controls playsinline style='display:none;width:100%;margin-top:8px;border-radius:10px'></video><button id='sbs' class='bt' style='display:none;margin-top:8px'>💾 동영상 파일로 저장</button><a id='sdl' class='bt' draggable='true' style='display:none;margin-top:8px;text-decoration:none;cursor:grab;text-align:center'></a><p class='note'>위 입력(회전수·탱크·날 지름 비)을 바꾸면 시뮬레이션이 바로 바뀝니다. 흐름(흰 점)은 점도에 따른 개략 표현이며 실제 유동과는 다릅니다. 저장 시 브라우저가 지원하면 mp4, 아니면 webm 파일입니다.</p></div>
+<div class='card'><h2>④ 감속비 선정표</h2><div class='sc'><table id='atb'></table></div><p class='note'>초록 행이 추천 (선정 모터로 필요 토크를 낼 수 있고, 출력 rpm이 목표에 가장 가까운 감속비). 인버터로 속도를 낮추면 모터 토크가 줄어드니 저속은 감속기로 맞추세요.</p></div>
+<p class='note'>※ 동력수 Np·Kp는 일반 문헌값 기준 추정(배플 없는 탱크, 액면 높이≈탱크 지름 기준)이며 고추장 등 비뉴턴 유체는 실제와 다를 수 있습니다. 시동 시에는 정지 마찰로 토크가 더 크니 소프트스타트(인버터)를 권장합니다.</p></div>
+<div id='pg3' style='display:none'>
+<div class='card'><h2>① 이번 견적 조건 (통화하면서 입력)</h2><div class='note' style='margin-bottom:8px'>입력하는 대로 화면 맨 아래 바에 예상견적이 바로 나옵니다. 교반기·충진기 탭의 계산 결과(모터 kW, 실린더 보어)가 자동으로 반영됩니다.</div><div class='g'>
+<div style='grid-column:1/-1'><label>업체명 / 담당자 (주문자)</label><input id='qcu' type='text' placeholder='예: ○○식품 김대리'></div>
+<div style='grid-column:1/-1'><label>품목 / 메모</label><input id='qme' type='text' placeholder='예: 고추장 교반기 200L'></div>
+<div><label>★ 탱크 용량 (L)</label><input id='qL' type='number' value='200'></div>
+<div><label>재질</label><select id='qmt'><option value='1'>SUS304</option><option value='1.3'>SUS316 (×1.3)</option></select></div>
+<div><label>교반기</label><select id='qag'><option value='1'>포함</option><option value='0'>제외</option></select></div>
+<div><label>충진기(실린더)</label><select id='qfl'><option value='0'>제외</option><option value='1'>포함</option></select></div>
+<div><label>충진기 헤드 수</label><input id='qhd' type='number' value='1' min='1'></div>
+<div><label>레이저 절단 길이 (m)</label><input id='qlm' type='number' value='0'></div>
+<div><label>절곡 횟수 (회)</label><input id='qbn' type='number' value='0'></div>
+<div><label>판재 중량 (kg)</label><input id='qkg' type='number' value='0'></div>
+<div><label>조립·인건비 (일)</label><input id='qdy' type='number' value='3'></div>
+<div><label>운송·설치</label><select id='qsh'><option value='1'>포함</option><option value='0'>제외</option></select></div>
+<div><label>기타 추가금 (원)</label><input id='qex' type='number' value='0'></div>
+<div><label>마진율 (%)</label><input id='qpm' type='number' value='15'></div>
+</div></div>
+<div class='card'><h2>② 견적 내역 (내부용: 원가·마진 표시)</h2><div class='sc'><table id='qtb' class='qt'></table></div><div id='qsm' class='msg ok' style='font-size:15px;margin-top:10px'></div>
+<div style='display:flex;flex-wrap:wrap;gap:8px;margin-top:8px'><button class='bt' id='qsv'>💾 견적 저장 (이 기기)</button><button class='bt' id='qcp'>📋 고객용 견적 글 복사</button></div>
+<a id='qdl' class='bt' draggable='true' style='display:block;margin-top:8px;text-decoration:none;cursor:grab;text-align:center'>⬇ 고객용 견적서 파일 — 이 칸을 잡고 바탕화면·폴더로 끌어다 놓으세요</a><div id='qmg2' class='note' style='margin-top:6px'>고객용 견적서/글에는 마진이 표시되지 않고, 항목 금액에 마진이 포함되어 나옵니다.</div></div>
+<div class='card'><h2>③ 저장된 견적</h2><div id='qls'></div></div>
+<div class='card'><h2>④ 단가표 (한 번 입력하면 이 기기에 저장)</h2><div class='msg'>처음 들어 있는 단가는 임시 예시입니다. 반드시 실제 단가로 고쳐 주세요.</div><div class='g' style='margin-top:8px'><div style='grid-column:1/-1'><label>공급자 (상호)</label><input id='ps_name' class='pi' type='text' value='이진주방산업'></div></div><div id='qpt'></div></div>
+</div>
+<div id='qbar' onclick='tab(3)'></div>
+</div>
+<script>
+var P=[["물",1,1],["식초",2,1.01],["간장",10,1.2],["식용유",60,.92],["참기름",70,.92],["돈가스소스",2000,1.2],["케첩",5000,1.1],["마요네즈",8000,.95],["꿀",10000,1.4],["카레·죽류",15000,1.1],["잼",20000,1.3],["물엿·조청",30000,1.4],["쌈장",80000,1.2],["고추장",100000,1.2],["된장",150000,1.2],["직접입력",1000,1]];
+var B=[32,40,50,63,80,100,125,150,200];
+var $=function(i){return document.getElementById(i)};
+function cat(v){return v<500?{n:"저점도",m:5,v:300,nd:6,pd:12}:v<10000?{n:"중점도",m:8,v:200,nd:10,pd:19}:v<=100000?{n:"고점도",m:10,v:100,nd:16,pd:25}:{n:"초고점도",m:12,v:50,nd:25,pd:38}}
+function defs(){var c=cat(+$("vi").value);$("mg").value=c.m;$("vm").value=c.v;$("nd").value=c.nd;$("pd").value=c.pd}
+P.forEach(function(p,i){var o=document.createElement("option");o.value=i;o.textContent=p[0]+(i<15?" (≈"+p[1].toLocaleString()+" cP)":"");$("pr").appendChild(o)});
+$("pr").value=13;
+function pick(){var p=P[$("pr").value];$("vi").value=p[1];$("de").value=p[2];defs();calc()}
+$("pr").onchange=pick;
+$("vi").onchange=function(){$("pr").value=15;defs();calc()};
+document.querySelectorAll("input").forEach(function(e){e.oninput=calc});
+function f(n,d){return Number(n).toLocaleString("ko-KR",{maximumFractionDigits:d==null?1:d})}
+function calc(){
+var mu=+$("vi").value/1000,rho=+$("de").value*1000,V=+$("vf").value,n=+$("rt").value,du=+$("du").value/100,mg=+$("mg").value/100,vm=+$("vm").value,
+dn=$("nd").value/1000,ln=$("nl").value/1000,dp=$("pd").value/1000,lp=$("pl").value/1000,ap=+$("ap").value,sf=+$("sf").value||1.5;
+if(!(mu>0&&V>0&&n>0&&dn>0&&dp>0))return;
+var c=cat(mu*1000),tf=60/n*du,Vc=V*(1+mg),Q=V*1e-6/tf,
+dP=128*mu*Q*(ln/(Math.PI*Math.pow(dn,4))+lp/(Math.PI*Math.pow(dp,4))),
+re=4*rho*Q/(Math.PI*dn*mu),mass=V*(+$("de").value);
+$("cl").textContent="점도 "+f(mu*1000,0)+" cP → ["+c.n+"] 등급 · 권장 여유율 "+c.m+"%, 권장 최대속도 "+c.v+"mm/s, 권장 노즐 Ø"+c.nd+"mm 이상";
+var rows=B.map(function(D){var A=Math.PI/4*D*D,L=Vc*1000/A,F=dP*A*1e-6*sf,v=L/tf,r=L/D;
+var pb=Math.sqrt(4*F/(Math.PI*ap*1e6*.8))*1000;
+return{D:D,L:L,r:r,v:v,F:F,pb:pb,ok:r>=1&&r<=3&&v<=vm}});
+var best=null;rows.forEach(function(r){if(r.ok&&(!best||Math.abs(r.r-2)<Math.abs(best.r-2)))best=r});
+if(!best){rows.forEach(function(r){if(r.r>=.8&&r.r<=3.5&&(!best||Math.abs(r.r-2)<Math.abs(best.r-2)))best=r})}
+FL=best?{D:best.D,L:best.L}:null;var K=[["필요 실린더 용량",f(Vc,0)+" mL","충진량 "+f(V,0)+"mL + 여유 "+f(mg*100,0)+"%"],
+["충진 1회 중량",f(mass,0)+" g","비중 "+$("de").value],
+["충진 시간",f(tf,2)+" 초","사이클 "+f(60/n,2)+"초 중 "+f(du*100,0)+"%"],
+["유량",f(Q*1e6,0)+" mL/s",f(Q*6e7,0)+" mL/분"],
+["배관·노즐 압력손실",f(dP/1e5,2)+" bar",f(dP/1000,0)+" kPa"]];
+if(best){K.unshift(["추천 보어 × 행정","Ø"+best.D+" × "+f(best.L,0)+" mm","행정/보어 "+f(best.r,1)+" · 속도 "+f(best.v,0)+"mm/s"],
+["필요 추력",f(best.F,0)+" N","≈ "+f(best.F/9.81,0)+" kgf (계산힘 × "+sf+"배)"],
+["공압 구동 시 에어실린더 보어","Ø"+f(Math.ceil(best.pb/5)*5,0)+" mm 이상","공압 "+ap+"MPa, 효율 80%"],["공압 힘 여유 (직결 시)",f(.8*ap*1e6/dP,1)+" 배","목표 "+sf+"배 · 순수 필요압 "+f(dP/1e5,2)+"bar"])}
+$("kp").innerHTML=K.map(function(k,i){return'<div class="kp'+(i==0?" hl":"")+'"><span>'+k[0]+'</span><b>'+k[1]+'</b><span>'+k[2]+'</span></div>'}).join("");
+var m=[];
+if(!best)m.push("조건에 맞는 표준 보어가 없습니다. 충진 시간을 늘리거나(분당 횟수↓) 충진량을 확인하세요.");
+else if(best.v>vm)m.push("피스톤 속도 "+f(best.v,0)+"mm/s가 권장 한도("+vm+") 초과입니다. 분당 횟수를 줄이거나 충진 시간 비율을 높이세요.");
+if(dP>6e5)m.push("압력손실이 "+f(dP/1e5,1)+"bar로 큽니다. 노즐·배관 내경을 키우거나 길이를 줄이고, 서보(볼스크류)/호퍼 가압 방식을 검토하세요.");
+if(.8*ap*1e6/dP<sf)m.push("공압 "+ap+"MPa 직결로는 힘 여유가 "+f(.8*ap*1e6/dP,1)+"배로 목표("+sf+"배)보다 작습니다. 에어실린더 보어를 키우거나 공압·서보 구동을 검토하세요.");
+if(dn*1000<c.nd)m.push("노즐 내경이 "+c.n+" 권장값(Ø"+c.nd+"mm)보다 작습니다.");
+if(re>2000)m.push("레이놀즈수 "+f(re,0)+" → 난류 가능성이 있어 압력 계산이 부정확합니다(저점도에서는 보통 문제 없음).");
+if(mu*1000>=10000)m.push("고점도 제품은 흡입 쪽(호퍼→실린더) 배관도 굵고 짧게, 로터리밸브 또는 대구경 3방밸브를 권장합니다.");
+$("ms").innerHTML=m.map(function(t){return'<div class="msg">'+t+'</div>'}).join("");
+$("tb").innerHTML="<tr><th>보어(mm)</th><th>행정(mm)</th><th>행정/보어</th><th>속도(mm/s)</th><th>추력(N)</th><th>추력(kgf)</th></tr>"+rows.map(function(r){return"<tr class='"+(r===best?"rec":r.ok?"":"bad")+"'><td>Ø"+r.D+"</td><td>"+f(r.L,0)+"</td><td>"+f(r.r,2)+"</td><td>"+f(r.v,0)+"</td><td>"+f(r.F,0)+"</td><td>"+f(r.F/9.81,0)+"</td></tr>"}).join("")}
+var AT=[['앵커',250,.35,.95],['리본(헬리컬)',300,.6,.95],['평날 패들',50,1.7,.6],['터빈(러시톤)',70,4.5,.35],['프로펠러(3엽)',42,.35,.4]],M=[.1,.2,.4,.75,1.5,2.2,3.7,5.5,7.5,11,15,18.5,22,30,37],RI=[5,10,15,20,25,30,40,50,60,80,100];
+P.forEach(function(p,i){var o=document.createElement('option');o.value=i;o.textContent=p[0]+(i<15?' (≈'+p[1].toLocaleString()+' cP)':'');$('apr').appendChild(o)});
+AT.forEach(function(t,i){var o=document.createElement('option');o.value=i;o.textContent=t[0];$('aty').appendChild(o)});
+$('apr').value=13;
+function agpick(){var p=P[$('apr').value];$('avi').value=p[1];$('ade').value=p[2];$('adr').value=AT[$('aty').value][3];agcalc()}
+$('apr').onchange=agpick;
+$('avi').onchange=function(){$('apr').value=15;agcalc()};
+$('aty').onchange=function(){$('adr').value=AT[$('aty').value][3];agcalc()};
+document.querySelectorAll('#pg2 input,#pg2 select').forEach(function(e){if(e.id!='apr'&&e.id!='aty')e.oninput=agcalc});
+function tab(n){for(var i=1;i<4;i++){$('pg'+i).style.display=n==i?'':'none';$('t'+i).className=n==i?'on':''}$('qbar').style.display=n==3?'none':'flex';window.scrollTo(0,0)}
+function agcalc(){
+var mu=$('avi').value/1000,rho=$('ade').value*1000,V=$('avl').value/1000,T=$('atd').value/1000,t=AT[$('aty').value],dr=+$('adr').value,rpm=+$('arp').value,eta=$('aef').value/100,sf=+$('asf').value||1.5,nm=+$('amp').value,tau=+$('atau').value;
+if(!(mu>0&&V>0&&T>0&&dr>0&&rpm>0&&eta>0&&tau>0))return;
+if($('arm').value=='a'){var vk=[1.5,1.2,2.5,4,5][$('aty').value]*(mu<.5?1:mu<10?.6:mu<=100?.35:.2);rpm=Math.max(5,Math.round(vk/(Math.PI*T*dr)*60));$('arp').value=rpm}
+var D=T*dr,N=rpm/60,H=V/(Math.PI/4*T*T),hf=Math.min(2,Math.max(.3,H/T)),Re=rho*N*D*D/mu,Np=Math.max(t[1]/Re,t[2]),P0=Np*rho*Math.pow(N,3)*Math.pow(D,5)*hf,
+Pk=P0/eta/1000,Pr=Pk*sf,Pm=M.find(function(x){return x>=Pr})||Math.ceil(Pr),Tq=P0/(2*Math.PI*N),Td=Tq*sf,ds=Math.ceil(Math.pow(16*Td/(Math.PI*tau*1e6),1/3)*1000/5)*5||5,vt=Math.PI*D*N;
+AG={D:D,T:T,H:H,rpm:rpm,Re:Re,vt:vt,ty:+$('aty').value,col:SC[P[$('apr').value][0]]||'#4f8fd8',Pm:Pm};var reg=Re<10?'완전 층류 (고점도)':Re<10000?'전이 영역':'난류';
+$('acl').textContent='점도 '+f(mu*1000,0)+' cP · '+t[0]+' · 날 Ø'+f(D*1000,0)+'mm · '+rpm+'rpm'+($('arm').value=='a'?' (자동 추천)':'');
+var rows=RI.map(function(i){var o=nm/i,tq=Pm*1000*eta/(2*Math.PI*o/60);return{i:i,o:o,tq:tq,ok:tq>=Td}});
+var best=null;rows.forEach(function(r){if(r.ok&&(!best||Math.abs(r.o-rpm)<Math.abs(best.o-rpm)))best=r});
+var K=[['교반날 지름','Ø'+f(D*1000,0)+' mm','D/T '+dr+' · 액면 '+f(H*1000,0)+'mm'],['레이놀즈수 Re',f(Re,1),reg],['축 소요동력',f(P0,0)+' W','Np '+f(Np,2)],['모터 필요 출력',f(Pr,2)+' kW','효율 '+f(eta*100,0)+'% · 힘 배수 '+sf+'배'],['선정 모터',Pm+' kW','약 '+f(Pm/.746,1)+' 마력 · '+nm+'rpm'],['설계 토크',f(Td,0)+' N·m','≈ '+f(Td/9.81,0)+' kgf·m (축 토크×'+sf+')'],['교반축 지름','Ø'+ds+' mm 이상','허용 전단 '+tau+'MPa'],['날끝 속도',f(vt,2)+' m/s','π·D·N']];
+if(best)K.unshift(['추천 감속비','1 : '+best.i,'출력 '+f(best.o,1)+'rpm (목표 '+rpm+'rpm)']);
+$('akp').innerHTML=K.map(function(k,i){return "<div class='kp"+(i==0&&best?' hl':'')+"'><span>"+k[0]+'</span><b>'+k[1]+'</b><span>'+k[2]+'</span></div>'}).join('');
+var m=[];
+if(!best)m.push('선정 모터로 필요 토크를 내는 감속비가 없습니다. 모터 용량을 키우거나 회전수·날 지름을 줄이세요.');
+if(Pr>37)m.push('필요 출력이 매우 큽니다. 회전수나 날 지름을 낮추는 것을 검토하세요.');
+if(vt>4)m.push('날끝 속도가 '+f(vt,1)+'m/s로 빠릅니다. 제품이 거품·전단 손상을 받을 수 있습니다.');
+if(mu*1000>=10000&&(t[0].indexOf('앵커')<0&&t[0].indexOf('리본')<0))m.push('고점도(1만 cP 이상)는 앵커·리본 날이 적합합니다. 선택한 날은 혼합이 잘 안 될 수 있습니다.');
+if(H>1.5*T)m.push('액면이 탱크 지름의 1.5배를 넘습니다. 날을 2단으로 하는 것을 검토하세요.');
+$('ams').innerHTML=m.map(function(x){return "<div class='msg'>"+x+'</div>'}).join('');
+$('atb').innerHTML='<tr><th>감속비</th><th>출력 rpm</th><th>선정 모터 출력토크(N·m)</th><th>필요 설계토크(N·m)</th></tr>'+rows.map(function(r){return "<tr class='"+(r===best?'rec':r.ok?'':'bad')+"'><td>1 : "+r.i+'</td><td>'+f(r.o,1)+'</td><td>'+f(r.tq,0)+'</td><td>'+f(Td,0)+'</td></tr>'}).join('')}
+var SC={'고추장':'#b3361b','된장':'#8b5a2b','쌈장':'#7a4a22','케척':'#c0392b','꿀':'#e0a800','물엿·조청':'#c8922a','마요네즈':'#f3e9c6','간장':'#3b2314','식용유':'#e8c547','참기름':'#c98a1c','잼':'#9b2d5c','카레·죽류':'#d4a017','돈가스소스':'#5a2d1a'};
+var AG=null,DL=null,SM={th:0,last:0,run:true,rec:false,t0:0,dur:10,pts:[]};
+for(var i=0;i<160;i++)SM.pts.push({r:Math.sqrt(Math.random())*.96+.02,a:Math.random()*6.283});
+try{claude.use('downloads').then(function(d){DL=d}).catch(function(){})}catch(e){}
+var cv=$('cv'),cx=cv.getContext('2d');
+function arc(x,y,r,a,b,w,c){cx.beginPath();cx.arc(x,y,r,a,b);cx.lineWidth=w;cx.strokeStyle=c;cx.stroke()}
+function ln(x1,y1,x2,y2,w,c){cx.beginPath();cx.moveTo(x1,y1);cx.lineTo(x2,y2);cx.lineWidth=w;cx.strokeStyle=c;cx.lineCap='round';cx.stroke()}
+function sdraw(ts){requestAnimationFrame(sdraw);var dt=Math.min(.05,(ts-SM.last)/1000||0);SM.last=ts;
+if(!AG||!$('pg2').offsetParent)return;
+var sp=+$('sps').value,w=2*Math.PI*AG.rpm/60;if(SM.run)SM.th+=w*dt*sp;
+var cx0=250,cy0=250,Rt=200,Rd=Rt*AG.D/AG.T,ty=AG.ty,bc='#e2e8f0';
+cx.fillStyle='#0f1720';cx.fillRect(0,0,960,480);
+cx.beginPath();cx.arc(cx0,cy0,Rt,0,7);cx.fillStyle=AG.col;cx.globalAlpha=.55;cx.fill();cx.globalAlpha=1;
+var c=AG.Re<10?.9:AG.Re<1e4?.6:.45;cx.fillStyle='rgba(255,255,255,.75)';
+SM.pts.forEach(function(p){var f=c*(p.r<=Rd/Rt?1:Math.pow(Rd/Rt/p.r,2));if(SM.run)p.a+=w*f*dt*sp;cx.fillRect(cx0+Math.cos(p.a)*p.r*Rt-1.5,cy0+Math.sin(p.a)*p.r*Rt-1.5,3,3)});
+arc(cx0,cy0,Rt,0,7,5,'#cbd5e1');
+var th=SM.th,k,a;
+if(ty<2){[0,Math.PI].forEach(function(o){var a=th+o;ln(cx0,cy0,cx0+Math.cos(a)*Rd,cy0+Math.sin(a)*Rd,7,bc);arc(cx0,cy0,Rd,a-.6,a+.6,8,bc);if(ty==1)arc(cx0,cy0,Rd*.8,a-.6,a+.6,5,bc)})}
+else if(ty==2){[0,Math.PI].forEach(function(o){var a=th+o;ln(cx0,cy0,cx0+Math.cos(a)*Rd,cy0+Math.sin(a)*Rd,Math.max(10,Rd*.2),bc)})}
+else if(ty==3){arc(cx0,cy0,Rd*.55,0,7,3,bc);for(k=0;k<6;k++){a=th+k*Math.PI/3;ln(cx0+Math.cos(a)*Rd*.55,cy0+Math.sin(a)*Rd*.55,cx0+Math.cos(a)*Rd,cy0+Math.sin(a)*Rd,9,bc)}}
+else{for(k=0;k<3;k++){a=th+k*2.094;ln(cx0,cy0,cx0+Math.cos(a)*Rd,cy0+Math.sin(a)*Rd,16,bc)}}
+cx.beginPath();cx.arc(cx0,cy0,8,0,7);cx.fillStyle='#fbbf24';cx.fill();
+var sc=Math.min(380/AG.T,330/(AG.H*1.15)),tw=AG.T*sc,thh=AG.H*1.15*sc,sx=710,sb=440,x0=sx-tw/2,hy=AG.H*sc,d2=AG.D*sc,cs=Math.max(.1,Math.abs(Math.cos(th)));
+cx.fillStyle=AG.col;cx.globalAlpha=.55;cx.fillRect(x0,sb-hy,tw,hy);cx.globalAlpha=1;
+cx.strokeStyle='#cbd5e1';cx.lineWidth=5;cx.beginPath();cx.moveTo(x0,sb-thh);cx.lineTo(x0,sb);cx.lineTo(x0+tw,sb);cx.lineTo(x0+tw,sb-thh);cx.stroke();
+ln(sx,sb-thh-8,sx,sb-hy*.12,Math.max(5,sc*.03),'#94a3b8');
+if(ty<2){ln(sx-d2/2*cs,sb-hy*.05,sx+d2/2*cs,sb-hy*.05,7,bc);ln(sx-d2/2*cs,sb-hy*.05,sx-d2/2*cs,sb-hy*.88,7,bc);ln(sx+d2/2*cs,sb-hy*.05,sx+d2/2*cs,sb-hy*.88,7,bc);if(ty==1)for(k=0;k<4;k++){var yy=sb-hy*(.15+k*.2);ln(sx-d2*.4*cs,yy,sx+d2*.4*cs,yy-hy*.1,4,bc)}}
+else if(ty==2){cx.fillStyle=bc;cx.fillRect(sx-d2/2*cs,sb-hy*.25-d2*.1,d2*cs,d2*.2)}
+else if(ty==3){cx.fillStyle=bc;cx.fillRect(sx-d2/2,sb-hy*.2-d2*.1,d2,d2*.2);cx.fillRect(sx-d2*.28,sb-hy*.2-2,d2*.56,4)}
+else{cx.fillStyle=bc;cx.beginPath();cx.ellipse(sx,sb-hy*.15,d2/2*cs,d2*.07,0,0,7);cx.fill()}
+cx.fillStyle=bc;cx.font='bold 17px sans-serif';cx.fillText(AG.rpm+' rpm  ·  날 Ø'+Math.round(AG.D*1000)+'mm  ·  탱크 Ø'+Math.round(AG.T*1000)+'mm',16,28);
+cx.font='14px sans-serif';cx.fillStyle='#94a3b8';cx.fillText('날끝 '+AG.vt.toFixed(2)+' m/s · Re '+(AG.Re<100?AG.Re.toFixed(1):Math.round(AG.Re))+' · 위에서 본 모습',16,50);
+cx.fillText('옆에서 본 모습 (액면 '+Math.round(AG.H*1000)+'mm)',520,28);
+var wt=$('wtx').value;if(wt){cx.save();cx.globalAlpha=+$('wal').value;cx.fillStyle=$('wco').value;var fs=+$('wsz').value||36,ps=$('wps').value;cx.font='bold '+fs+'px sans-serif';cx.textBaseline='middle';var mw=cx.measureText(wt).width;
+if(ps=='t'){cx.rotate(-.35);var tw=mw+fs*2,rr=0;for(var yy=-300;yy<900;yy+=fs*3,rr++)for(var xx=-400+(rr%2)*tw/2;xx<1100;xx+=tw)cx.fillText(wt,xx,yy)}
+else{cx.fillText(wt,ps=='c'?480-mw/2:ps[1]=='l'?20:940-mw,ps=='c'?240:ps[0]=='t'?fs:480-fs)}
+cx.restore()}
+if(SM.rec){var left=Math.max(0,SM.dur-(performance.now()-SM.t0)/1000);cx.fillStyle='#ef4444';cx.beginPath();cx.arc(850,22,8,0,7);cx.fill();cx.fillStyle=bc;cx.fillText('REC '+left.toFixed(0)+'s',865,28)}}
+$('sdl').ondragstart=function(e){e.dataTransfer.effectAllowed='copy';e.dataTransfer.setData('DownloadURL',SM.blob.type.split(';')[0]+':'+this.download+':'+this.href)};
+$('sbs').onclick=function(){var mg=$('smg');mg.textContent='';var g;try{g=DL?Promise.resolve(DL):claude.use('downloads')}catch(e){g=Promise.resolve(null)}
+g.then(function(d){if(!d)throw{code:'unavailable'};DL=d;return d.save({filename:'agitator_'+SM.rpm+'rpm.'+SM.ext,data:SM.blob})}).then(function(){mg.textContent='저장했습니다.'}).catch(function(e){var c=e&&e.code;mg.textContent=c=='declined'?'저장을 취소했습니다.':(c=='unavailable'||c=='not_granted'||!c)?'이 화면에서는 저장 기능을 쓸 수 없습니다. claude.ai 앱/웹에서 이 페이지를 열어 다시 시도하거나, 위 영상 플레이어에서 길게 누르기·우클릭으로 저장해 보세요.':'저장 실패 ('+c+')'})};
+$('sbp').onclick=function(){SM.run=!SM.run;this.textContent=SM.run?'⏸ 정지':'▶ 재생'};
+$('sbr').onclick=function(){var mg=$('smg');if(SM.rec)return;
+if(!window.MediaRecorder||!cv.captureStream){mg.textContent='이 브라우저는 녹화를 지원하지 않습니다.';return}
+var mt=['video/mp4;codecs=avc1','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].filter(function(m){return MediaRecorder.isTypeSupported(m)})[0];
+if(!mt){mg.textContent='녹화 형식을 지원하지 않습니다.';return}
+var ext=mt.indexOf('mp4')>=0?'mp4':'webm',ch=[],rc=new MediaRecorder(cv.captureStream(30),{mimeType:mt,videoBitsPerSecond:4000000});
+rc.ondataavailable=function(e){if(e.data.size)ch.push(e.data)};
+rc.onstop=function(){SM.rec=false;$('sbr').className='bt';$('sbr').textContent='● 동영상 녹화·저장';var b=new Blob(ch,{type:mt});if(b.size<1000){mg.textContent='녹화된 영상이 비어 있습니다. 화면을 켠 채로 다시 시도하세요.';return}SM.blob=b;SM.ext=ext;SM.rpm=AG.rpm;var v=$('svd');v.src=URL.createObjectURL(b);v.style.display='block';$('sbs').style.display='inline-block';var a=$('sdl');a.href=v.src;a.download='agitator_'+SM.rpm+'rpm.'+ext;a.textContent='⬇ '+a.download+'  (이 칸을 잡고 바탕화면·폴더로 끌어다 놓으세요)';a.style.display='block';mg.textContent='녹화 완료! 아래 영상을 확인하고, 마우스로 아래 파란 칸을 잡아 바탕화면이나 폴더로 끌어다 놓으면 저장됩니다.';return;
+if(!DL){mg.textContent='이 화면에서는 파일 저장을 쓸 수 없습니다. claude.ai에서 페이지를 열어 다시 시도하세요.';return}
+DL.save({filename:'agitator_'+AG.rpm+'rpm.'+ext,data:b}).then(function(){mg.textContent='저장했습니다.'}).catch(function(e){mg.textContent=e&&e.code=='declined'?'저장을 취소했습니다.':'저장에 실패했습니다 ('+(e&&e.code||'오류')+').'})};
+SM.dur=+$('srl').value;SM.t0=performance.now();SM.rec=true;SM.run=true;$('sbp').textContent='⏸ 정지';$('sbr').className='bt rec';$('sbr').textContent='녹화 중…';mg.textContent='';
+rc.start();setTimeout(function(){rc.stop()},SM.dur*1000)};
+$('arp').oninput=function(){$('arm').value='m';agcalc()};
+requestAnimationFrame(sdraw);
+var FL=null,QS=null,qurl=null;
+var PG=[['tank','탱크 본체 (용량별 원)','L',[50,100,200,300,500,1000,2000],[600000,900000,1400000,1900000,2800000,4800000,8500000]],['motor','기어드모터 (kW별 원)','kW',[.2,.4,.75,1.5,2.2,3.7,5.5,7.5,11,15,22],[280000,350000,480000,750000,1000000,1500000,2100000,2800000,4000000,5200000,7500000]],['inv','인버터 (kW별 원)','kW',[.2,.4,.75,1.5,2.2,3.7,5.5,7.5,11,15,22],[120000,150000,200000,280000,350000,500000,700000,900000,1300000,1700000,2400000]],['cyl','실린더 (보어 mm별 원)','mm',[32,40,50,63,80,100,125,150,200],[150000,200000,280000,380000,520000,700000,1000000,1400000,2200000]]],
+PS=[['bl0','교반날+축 제작 · 앵커',400000],['bl1','교반날+축 제작 · 리본',600000],['bl2','교반날+축 제작 · 패들',250000],['bl3','교반날+축 제작 · 터빈',300000],['bl4','교반날+축 제작 · 프로펠러',200000],['drv','충진기 구동부 1세트',500000],['nz','충진 노즐·밸브 1세트',300000],['lz','레이저 절단 (원/m)',2500],['bd','절곡 (원/회)',1500],['sh','판재 (원/kg)',4500],['dy','조립·인건비 (원/일)',200000],['ship','운송·설치비 (원)',300000]];
+function esc(s){return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
+function pv(id){return +$(id).value||0}
+function mw(x){return f(Math.round(x/10000),0)+'만원'}
+function lk(g,x,lin){var Q=PG.filter(function(q){return q[0]==g})[0],ks=Q[3],vs=ks.map(function(_,i){return pv('pt_'+g+'_'+i)}),n=ks.length-1,i;
+if(lin){if(x<=ks[0])return vs[0]*Math.max(.6,x/ks[0]);if(x>=ks[n])return vs[n]*x/ks[n];for(i=0;i<n;i++)if(x<=ks[i+1])return vs[i]+(vs[i+1]-vs[i])*(x-ks[i])/(ks[i+1]-ks[i])}
+for(i=0;i<=n;i++)if(x<=ks[i]+1e-9)return vs[i];return vs[n]*x/ks[n]}
+var h='';PG.forEach(function(g){h+='<details><summary>'+g[1]+'</summary><div class=g style=margin-top:8px>'+g[3].map(function(k,i){return '<div><label>'+k+g[2]+'</label><input class=pi id=pt_'+g[0]+'_'+i+' type=number value='+g[4][i]+'></div>'}).join('')+'</div></details>'});
+h+='<details open><summary>그 밖의 단가</summary><div class=g style=margin-top:8px>'+PS.map(function(s){return '<div><label>'+s[1]+'</label><input class=pi id=ps_'+s[0]+' type=number value='+s[2]+'></div>'}).join('')+'</div></details>';
+$('qpt').innerHTML=h;
+try{var sv=JSON.parse(localStorage.getItem('qp1')||'{}');Object.keys(sv).forEach(function(k){if($(k))$(k).value=sv[k]})}catch(e){}
+document.querySelectorAll('.pi').forEach(function(e){e.addEventListener('input',function(){try{var o={};document.querySelectorAll('.pi').forEach(function(x){o[x.id]=x.value});localStorage.setItem('qp1',JSON.stringify(o))}catch(e){}})});
+$('qL').addEventListener('input',function(){this.dataset.m=1});
+function crows(){if(!QS)return [];var k=QS.sub?1+QS.mgv/QS.sub:1,r=QS.it.map(function(x){return [x[0],x[1],Math.round(x[1]*x[2]*k/1000)*1000]}),s=0,mi=0;r.forEach(function(x,i){s+=x[2];if(x[2]>r[mi][2])mi=i});if(r.length)r[mi][2]+=QS.sup-s;return r}
+function qdoc(){var d=new Date().toLocaleDateString('ko-KR');return '<!DOCTYPE html><html lang=ko><meta charset=utf-8><title>견적서</title><style>body{font-family:sans-serif;max-width:720px;margin:24px auto;padding:0 16px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #999;padding:6px 8px;text-align:right}th:first-child,td:first-child{text-align:left}h1{text-align:center}tr.t td{font-weight:bold}</style><h1>견 적 서</h1><p>일자: '+d+'<br>수신: '+esc($('qcu').value)+'<br>품목: '+esc($('qme').value)+'<br>공급자: '+esc($('ps_name').value)+'</p><table><tr><th>항목</th><th>수량</th><th>금액(원)</th></tr>'+crows().map(function(r){return '<tr><td>'+esc(r[0])+'</td><td>'+r[1]+'</td><td>'+f(r[2],0)+'</td></tr>'}).join('')+'<tr class=t><td>공급가액</td><td></td><td>'+f(QS.sup,0)+'</td></tr><tr class=t><td>부가세 (10%)</td><td></td><td>'+f(QS.vat,0)+'</td></tr><tr class=t><td>합계</td><td></td><td>'+f(QS.tot,0)+'</td></tr></table><p>※ 본 견적은 예상 견적이며 사양 확정 후 변경될 수 있습니다.</p></html>'}
+function qtext(){var s='[견적서] '+new Date().toLocaleDateString('ko-KR')+'\n수신: '+$('qcu').value+'\n품목: '+$('qme').value+'\n공급자: '+$('ps_name').value+'\n';crows().forEach(function(r){s+='- '+r[0]+' x'+r[1]+' : '+f(r[2],0)+'원\n'});return s+'공급가액 '+f(QS.sup,0)+'원 / 부가세 '+f(QS.vat,0)+'원 / 합계 '+f(QS.tot,0)+'원\n※ 예상 견적이며 사양 확정 후 변경될 수 있습니다.'}
+function qcalc(){var q=$('qL');if(!q.dataset.m&&$('avl').value)q.value=$('avl').value;
+var mt=+$('qmt').value,L=+q.value||0,hd=Math.max(1,+$('qhd').value||1),it=[];
+function add(n,c,u){if(c>0&&u>0)it.push([n,c,Math.round(u)])}
+if(L>0)add('탱크 본체 '+L+'L ('+$('qmt').selectedOptions[0].text.split(' ')[0]+')',1,lk('tank',L,1)*mt);
+if($('qag').value=='1'&&AG){add('교반 기어드모터 '+AG.Pm+'kW',1,lk('motor',AG.Pm));add('인버터 '+AG.Pm+'kW',1,lk('inv',AG.Pm));add('교반날·축 제작 ('+AT[AG.ty][0]+')',1,pv('ps_bl'+AG.ty))}
+if($('qfl').value=='1'&&FL){add('충진 실린더 Ø'+FL.D+'×'+Math.round(FL.L)+'mm',hd,lk('cyl',FL.D));add('충진 구동부',hd,pv('ps_drv'));add('충진 노즐·밸브',hd,pv('ps_nz'))}
+add('레이저 절단(m)',+$('qlm').value,pv('ps_lz'));add('절곡(회)',+$('qbn').value,pv('ps_bd'));add('판재(kg)',+$('qkg').value,pv('ps_sh')*mt);add('조립·인건비(일)',+$('qdy').value,pv('ps_dy'));
+if($('qsh').value=='1')add('운송·설치',1,pv('ps_ship'));add('기타 추가금',1,+$('qex').value);
+var sub=0;it.forEach(function(r){sub+=r[1]*r[2]});var mg=(+$('qpm').value||0)/100,mgv=Math.round(sub*mg),sup=Math.round((sub+mgv)/1000)*1000,vat=Math.round(sup*.1),tot=sup+vat;
+QS={it:it,sub:sub,mgv:mgv,sup:sup,vat:vat,tot:tot};
+$('qtb').innerHTML='<tr><th>항목</th><th>수량</th><th>단가</th><th>금액</th></tr>'+it.map(function(r){return '<tr><td>'+esc(r[0])+'</td><td>'+r[1]+'</td><td>'+f(r[2],0)+'</td><td>'+f(r[1]*r[2],0)+'</td></tr>'}).join('')+'<tr><td>소계 (원가)</td><td></td><td></td><td>'+f(sub,0)+'</td></tr><tr><td>마진 '+f(mg*100,0)+'%</td><td></td><td></td><td>'+f(mgv,0)+'</td></tr><tr><td>공급가액 (천원 단위)</td><td></td><td></td><td>'+f(sup,0)+'</td></tr><tr><td>부가세 10%</td><td></td><td></td><td>'+f(vat,0)+'</td></tr><tr class=rec><td>합계</td><td></td><td></td><td>'+f(tot,0)+'</td></tr>';
+$('qsm').textContent='예상견적: 부가세 별도 약 '+mw(sup)+', 포함 약 '+mw(tot)+' (범위 '+mw(tot*.9)+' ~ '+mw(tot*1.1)+')';
+$('qbar').innerHTML='<div><span>예상견적 (부가세 포함)</span><br><b>'+(tot?'약 '+mw(tot):'입력 중…')+'</b></div><span>부가세 별도 약 '+mw(sup)+' ▸ 탭하면 견적서</span>';
+try{if(qurl)URL.revokeObjectURL(qurl);qurl=URL.createObjectURL(new Blob([qdoc()],{type:'text/html'}));var a=$('qdl');a.href=qurl;a.download='quote_'+new Date().toISOString().slice(0,10)+'.html'}catch(e){}}
+document.addEventListener('input',qcalc);document.addEventListener('change',qcalc);
+$('qdl').ondragstart=function(e){e.dataTransfer.effectAllowed='copy';e.dataTransfer.setData('DownloadURL','text/html:'+this.download+':'+this.href)};
+function qget(){try{return JSON.parse(localStorage.getItem('qs1')||'[]')}catch(e){return []}}
+function qput(l){try{localStorage.setItem('qs1',JSON.stringify(l))}catch(e){$('qmg2').textContent='이 화면에서는 저장소를 쓸 수 없습니다.'}}
+function qrl(){var l=qget();$('qls').innerHTML=l.map(function(r,i){return '<div class=kp style="margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><div><b style=font-size:15px>'+esc(r.n)+'</b><span>'+new Date(r.t).toLocaleDateString('ko-KR')+' · 약 '+mw(r.tot)+'</span></div><div><button class=bt onclick=qld('+i+')>불러오기</button> <button class=bt onclick=qdel('+i+')>삭제</button></div></div>'}).join('')||'<span class=note>저장된 견적이 없습니다.</span>'}
+function qld(i){var r=qget()[i];if(!r)return;Object.keys(r.v).forEach(function(k){var e=$(k);if(e)e.value=r.v[k]});$('qL').dataset.m=1;calc();agcalc();qcalc();$('qmg2').textContent='불러왔습니다.'}
+function qdel(i){var l=qget();l.splice(i,1);qput(l);qrl()}
+$('qsv').onclick=function(){var v={};document.querySelectorAll('input[id],select[id]').forEach(function(e){if(!e.classList.contains('pi'))v[e.id]=e.value});var l=qget();l.unshift({n:($('qcu').value||'이름 없음')+' · '+($('qme').value||''),t:Date.now(),tot:QS.tot,v:v});qput(l.slice(0,50));qrl();$('qmg2').textContent='저장했습니다. (이 기기·이 브라우저에 보관됩니다)'};
+$('qcp').onclick=function(){var t=qtext(),m=$('qmg2');function fb(){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();var ok=false;try{ok=document.execCommand('copy')}catch(e){}document.body.removeChild(a);m.textContent=ok?'복사했습니다.':'복사가 막혀 있습니다. 파일 칸을 끌어서 저장하세요.'}try{navigator.clipboard.writeText(t).then(function(){m.textContent='복사했습니다.'}).catch(fb)}catch(e){fb()}};
+pick();agpick();qcalc();qrl();
+</script></body></html>
